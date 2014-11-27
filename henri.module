@@ -1,0 +1,55 @@
+<?php
+// :DEVEL BEGIN
+function henri_menu() {
+    $items['hello'] = array(
+        'title' => 'Hello world!',
+        'page callback' => 'helloworld_page',
+        'access callback' => TRUE,
+    );
+    return $items;
+}
+function helloworld_page() {
+    echo 'henrisusanto';
+}
+// :DEVEL END
+
+
+// :SHIPPING BEGIN
+function henri_commerce_shipping_service_info_alter(&$shipping_services) {
+    // all active shipping services will use the same policy
+    foreach ($shipping_services as $name => $detail){
+        $shipping_services[$name]['callbacks']['rate'] = 'henri_zb_shipping_policy';
+    }
+}
+function henri_zb_shipping_policy($shipping_service, $order){
+    module_load_include('php', 'henri', '/classes/shipping');
+    $shipping = new shipping();
+    return $shipping->getShippingPrice($order);
+}
+// :SHIPPING END
+
+
+// :SORTING BEGIN
+function henri_field_create_instance($instance){
+    module_load_include('php', 'henri', '/classes/sorting');
+    $sorting = new sorting();
+    if($sorting->product_display['content_type_name'] == $instance['bundle'])
+        $sorting->updateProductLineSortingOptions();
+    else if($instance['entity_type'] == 'taxonomy_term' && $instance['bundle'] == $sorting->product_line['taxonomy_name'])
+        $sorting->updateProductCategorySortingOptions ();
+}
+function henri_field_delete_instance($instance){
+    module_load_include('php', 'henri', '/classes/sorting');
+    $sorting = new sorting();
+    if($sorting->product_display['content_type_name'] == $instance['bundle'])
+        $sorting->updateProductLineSortingOptions();
+    else if($instance['entity_type'] == 'taxonomy_term' && $instance['bundle'] == $sorting->product_line['taxonomy_name'])
+        $sorting->updateProductCategorySortingOptions ();
+}
+function henri_views_api() {
+    return array(
+        'api' => 2,
+        'path' => drupal_get_path('module', 'henri'),
+    );
+}
+// :SORTING END

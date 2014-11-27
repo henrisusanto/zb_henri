@@ -1,0 +1,10 @@
+<?php
+
+function henri_install() {
+    // :SORTING BEGIN
+    module_load_include('php', 'henri', '/classes/sorting');
+    $sorting = new sorting();
+    $sorting->updateProductLineSortingOptions();
+    $sorting->updateProductCategorySortingOptions();
+    // :SORTING END
+}
