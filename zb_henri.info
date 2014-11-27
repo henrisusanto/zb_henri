@@ -1,0 +1,12 @@
+;$Id$
+
+name = zb_henri
+description = A zb_henri module.
+core = 7.x
+package = Drupal 7 Development
+files[] = zb_henri.module
+files[] = zb_henri.test
+files[] = zb_henri.views.inc
+
+;dependencies[] = autoload
+;php = 5.2

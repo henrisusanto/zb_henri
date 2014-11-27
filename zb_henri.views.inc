@@ -1,7 +1,7 @@
 <?php
 
-function henri_views_query_alter(&$view, &$query) {
-    module_load_include('php', 'henri', '/classes/sorting');
+function zb_henri_views_query_alter(&$view, &$query) {
+    module_load_include('php', 'zb_henri', '/classes/sorting');
     $sorting = new sorting();
     $term = taxonomy_term_load($view->args[0]);
     if ($view->name == 'taxonomy_term'
