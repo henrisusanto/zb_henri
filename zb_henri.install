@@ -1,10 +1,7 @@
 <?php
 
 function zb_henri_install() {
-    // :SORTING BEGIN
     module_load_include('php', 'zb_henri', '/classes/sorting');
     $sorting = new sorting();
-    $sorting->updateProductLineSortingOptions();
-    $sorting->updateProductCategorySortingOptions();
-    // :SORTING END
+    $sorting->updateSortingOptions();
 }
