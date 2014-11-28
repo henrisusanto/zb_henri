@@ -16,6 +16,15 @@ function zb_henri_views_query_alter(&$view, &$query) {
             'direction' => $parameters['direction']
         );
     }else if($view->name == $sorting->product_category['views_machine_name']){
-        // SORTING PRODUCT CATEGORY GOES HERE
+        ## SUSPEND
+//        $parameters = $sorting->getProductCategorySortingParam($term);
+//        if(null == $parameters) return;
+//        $join = $parameters['join'];
+//        if(null != $join) $query->add_relationship($join->table, $join, $join->left_table);
+//        $query->orderby[0] = array(
+//            'field' => $parameters['field'],
+//            'field' => 'field_pline_1term_level_tid',
+//            'direction' => $parameters['direction']
+//        );
     }
 }
