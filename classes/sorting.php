@@ -14,6 +14,7 @@ class sorting {
         'taxonomy_name' => 'zb_product_line',
         'sorting_field' => 'field_pline_1field_sorting',
         'sorting_type_field' => 'field_pline_1bool_sorttype',
+        'natural_fields' => array('title' => 'Product Display Title')
     );
     var $product_category = array(
         'taxonomy_name' => 'zb_product_category',
@@ -29,7 +30,10 @@ class sorting {
         $allowed_list = array();
         foreach (field_info_instances('node', $this->product_display['content_type_name']) as $key => $value)
             $allowed_list[$key] = $value['label'];
-        $allowed_list['title'] = 'Product Display Title'; // NATURAL FIELD
+        
+        foreach($this->product_line['natural_fields'] as $field => $label)
+            $allowed_list[$field] = $label;
+        
         $info = field_info_field($this->product_line['sorting_field']);
         $values = &$info['settings']['allowed_values'];
         $values = $allowed_list;
@@ -61,7 +65,7 @@ class sorting {
         );
 
         if ($sorting_field == '0') $param = null;
-        else if ($sorting_field != 'title') {
+        else if (!in_array($sorting_field, array_keys($this->product_line['natural_fields']))) {
             $table_fields = db_query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_NAME`='field_data_$sorting_field'")->fetchAll();
             $foregin_key_relation = end($table_fields);
 
@@ -79,26 +83,6 @@ class sorting {
     }
 
     function getProductCategorySortingParam($term) {
-        $retrieved_field = field_get_items('taxonomy_term', $term, $this->product_category['sorting_field']);
-        $sorting_field = $retrieved_field[0]['value'];
-        die($sorting_field);
-        $retrieved_field = field_get_items('taxonomy_term', $term, $this->product_category['sorting_type_field']);
-
-        $table_fields = db_query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_NAME`='field_data_$sorting_field'")->fetchAll();
-        $foregin_key_relation = end($table_fields);
-
-        $join = new views_join();
-        $join->table = "field_data_$sorting_field";
-        $join->field = 'term_id';
-        $join->left_table = 'node';
-        $join->left_field = 'nid';
-        $join->type = 'LEFT';
-
-        return array(
-            'join' => $join,
-            'field' => $foregin_key_relation->COLUMN_NAME,
-            'direction' => $retrieved_field[0]['value'] ? 'ASC' : 'DESC'
-        );
     }
 
 }
