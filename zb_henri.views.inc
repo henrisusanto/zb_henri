@@ -1,5 +1,9 @@
 <?php
 
+/*
+ * implement hook_views_query_alter
+ * apply defined sorting into taxonomy views
+ */
 function zb_henri_views_query_alter(&$view, &$query) {
     module_load_include('php', 'zb_henri', '/classes/sorting');
     $sorting = new sorting();
@@ -17,6 +21,7 @@ function zb_henri_views_query_alter(&$view, &$query) {
                 'field' => $parameters['field'],
                 'direction' => $parameters['direction']
             );
+            $query->distinct = TRUE;
         }
     }
 }
