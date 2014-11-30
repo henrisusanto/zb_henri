@@ -10,9 +10,10 @@ function zb_henri_menu() {
         'access callback' => TRUE,
     );
     $items['admin/commerce/config/shipping/zb_shipping_config'] = array(
-        'title' => t('My form'),
+        'title' => t('ZB Shipping Config'),
         'access arguments' => array('administer shipping'),
         'type' => MENU_LOCAL_TASK,
+        'weight' => 11,
         'page callback' => 'drupal_get_form',
         'page arguments'=> array('zb_henri_shipping_config_form')
     );
@@ -72,29 +73,17 @@ function zb_henri_views_api() {
     );
 }
 
+/*
+ * Implement hook_form
+ */
 function zb_henri_shipping_config_form() {
-    $current_config = variable_get('zb_shipping_config');
-    $form['zb_shipping_amount'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Shipping amount ($)'),
-        '#required' => TRUE,
-        '#default_value' => null == $current_config ? 5 : $current_config['zb_shipping_amount'],
-    );
-    $form['zb_shipping_percentage'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Shipping percentage (%)'),
-        '#required' => TRUE,
-        '#default_value' => null == $current_config ? 9 : $current_config['zb_shipping_percentage'],
-    );
-    $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => 'Save',
-    );
-    return $form;
+    module_load_include('php', 'zb_henri', '/classes/shipping');
+    $shipping = new shipping();
+    return $shipping->getConfigFormElement();
 }
 
 function zb_henri_shipping_config_form_submit($form, &$form_state){
-    foreach(array('zb_shipping_amount','zb_shipping_percentage') as $config)
-        $zb_shipping_config[$config] = $form_state['values'][$config];
-    variable_set('zb_shipping_config', $zb_shipping_config);
+    module_load_include('php', 'zb_henri', '/classes/shipping');
+    $shipping = new shipping();
+    $shipping->setConfig($form_state);
 }

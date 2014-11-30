@@ -10,15 +10,10 @@
 
 class shipping {
 
-    var $shipping_product_types = array('zb_book');
-    var $shipping_percentage = 0.09; // 9%
-    var $shipping_rate = array(
-        'amount' => 500, // $5
-        'currency_code' => 'USD',
-        'data' => array(),
-    );
-
+    var $shipping_product_types = array('book');
+    
     function getShippingPrice($order) {
+        $config = $this->getConfig();
         $nine_percent = 0;
         foreach ($order->commerce_line_items['und'] as $container) {
             $line_item = commerce_line_item_load($container['line_item_id']);
@@ -27,14 +22,65 @@ class shipping {
                 if (in_array($product->type, $this->shipping_product_types)) {
                     $price = $product->commerce_price;
                     $price_amount = $price['und'][0]['amount'];
-                    $nine_percent += $price_amount * $line_item->quantity * $this->shipping_percentage;
+                    $nine_percent += $price_amount * $line_item->quantity * $config['zb_shipping_percentage'];
                 }
             }
         }
-        $this->shipping_rate['amount'] = 
-            $nine_percent > $this->shipping_rate['amount'] ?
-            $nine_percent : $this->shipping_rate['amount'];
-        return $this->shipping_rate;
+        
+        $shipping_rate = array(
+            'amount' => $config['zb_shipping_amount'],
+            'currency_code' => 'USD',
+            'data' => array(),
+        );
+        
+        $shipping_rate['amount'] = 
+            $nine_percent > $shipping_rate['amount'] ?
+            $nine_percent : $shipping_rate['amount'];
+        
+        return $shipping_rate;
     }
-
+    
+    function getConfigFormElement(){
+        $current_config = $this->getConfig(false);
+        $form['zb_shipping_amount'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Shipping amount ($)'),
+            '#required' => TRUE,
+            '#default_value' => $current_config['zb_shipping_amount'],
+        );
+        $form['zb_shipping_percentage'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Shipping percentage (%)'),
+            '#required' => TRUE,
+            '#default_value' => $current_config['zb_shipping_percentage'],
+        );
+        $form['submit'] = array(
+            '#type' => 'submit',
+            '#value' => 'Save',
+        );
+        return $form;
+    }
+    
+    function setConfig($form_state){
+        foreach(array('zb_shipping_amount','zb_shipping_percentage') as $config)
+            $zb_shipping_config[$config] = $form_state['values'][$config];
+        variable_set('zb_shipping_config', $zb_shipping_config);
+    }
+    
+    function getConfig($calculated = TRUE){
+        $config = array(
+            'zb_shipping_amount' => 5,
+            'zb_shipping_percentage' => 9,
+        );
+        $current_config = variable_get('zb_shipping_config');
+        if(null!=$current_config){
+            $config['zb_shipping_amount'] = $current_config['zb_shipping_amount'];
+            $config['zb_shipping_percentage'] = $current_config['zb_shipping_percentage'];
+        }
+        if($calculated){
+            $config['zb_shipping_amount'] = $config['zb_shipping_amount'] * 100;
+            $config['zb_shipping_percentage'] = $config['zb_shipping_percentage'] / 100;
+        }
+        return $config;
+    }
 }
