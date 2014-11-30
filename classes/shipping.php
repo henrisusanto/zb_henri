@@ -10,7 +10,7 @@
 
 class shipping {
 
-    var $shipping_product_types = array('book');
+    var $shipping_product_types = array('zb_book');
     var $shipping_percentage = 0.09; // 9%
     var $shipping_rate = array(
         'amount' => 500, // $5
