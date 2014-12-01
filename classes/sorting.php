@@ -29,7 +29,6 @@ class sorting {
         $options = $this->getProductDisplayFields();
         $this->updateCategorySortingOption($options);
         $this->updateProductLineSortingOption($options);
-        drupal_set_message('Sorting options updated successfully'.  json_encode($options));
     }
 
     /*

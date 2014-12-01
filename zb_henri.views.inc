@@ -5,11 +5,10 @@
  * apply defined sorting into taxonomy views
  */
 function zb_henri_views_query_alter(&$view, &$query) {
-    module_load_include('php', 'zb_henri', '/classes/sorting');
-    $sorting = new sorting();
-    $term = taxonomy_term_load($view->args[0]);
-
     if ($view->name == 'taxonomy_term') {
+        module_load_include('php', 'zb_henri', '/classes/sorting');
+        $sorting = new sorting();
+        $term = taxonomy_term_load($view->args[0]);
         if ($term->vocabulary_machine_name == $sorting->product_line['taxonomy_name'] ||
                 $term->vocabulary_machine_name == $sorting->product_category['taxonomy_name']) {
             $taxonomy = $term->vocabulary_machine_name == $sorting->product_line['taxonomy_name']?$sorting->product_line:$sorting->product_category;
