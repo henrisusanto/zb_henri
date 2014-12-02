@@ -9,8 +9,6 @@
  */
 
 class shipping {
-
-    var $shipping_product_types = array('book');
     
     function getShippingPrice($order) {
         $config = $this->getConfig();
@@ -19,7 +17,7 @@ class shipping {
             $line_item = commerce_line_item_load($container['line_item_id']);
             if ($line_item->type == 'product') {
                 $product = commerce_product_load_by_sku($line_item->line_item_label);
-                if (in_array($product->type, $this->shipping_product_types)) {
+                if (in_array($product->type, $config['zb_shipping_product_variations'])) {
                     $price = $product->commerce_price;
                     $price_amount = $price['und'][0]['amount'];
                     $nine_percent += $price_amount * $line_item->quantity * $config['zb_shipping_percentage'];
@@ -28,8 +26,8 @@ class shipping {
         }
         
         $shipping_rate = array(
-            'amount' => $config['zb_shipping_amount'],
-            'currency_code' => 'USD',
+            'amount' => $nine_percent > 0 ? $config['zb_shipping_amount'] : 0,
+            'currency_code' => $order->commerce_order_total['und'][0]['currency_code'],
             'data' => array(),
         );
         
@@ -42,6 +40,16 @@ class shipping {
     
     function getConfigFormElement(){
         $current_config = $this->getConfig(false);
+        
+        $options = array();
+        foreach (commerce_product_types() as $variation) $options[$variation['type']] = $variation['name'];
+        $form['zb_shipping_product_variations'] = array(
+            '#type' => 'checkboxes',
+            '#title'=> t('Shippable product variation'),
+            '#required'=> TRUE,
+            '#options' => $options,
+            '#default_value' => $current_config['zb_shipping_product_variations']
+        );
         $form['zb_shipping_amount'] = array(
             '#type' => 'textfield',
             '#title' => t('Shipping amount ($)'),
@@ -62,6 +70,11 @@ class shipping {
     }
     
     function setConfig($form_state){
+        $variations = array();
+        foreach(array_keys(commerce_product_types()) as $option)
+            if($form_state['values']['zb_shipping_product_variations'][$option] != '0') $variations[] = $option;
+        $zb_shipping_config['zb_shipping_product_variations'] = $variations;
+                
         foreach(array('zb_shipping_amount','zb_shipping_percentage') as $config)
             $zb_shipping_config[$config] = $form_state['values'][$config];
         variable_set('zb_shipping_config', $zb_shipping_config);
@@ -71,6 +84,7 @@ class shipping {
         $config = array(
             'zb_shipping_amount' => 5,
             'zb_shipping_percentage' => 9,
+            'zb_shipping_product_variations' => array()
         );
         $current_config = variable_get('zb_shipping_config');
         if(null!=$current_config){
@@ -81,6 +95,7 @@ class shipping {
             $config['zb_shipping_amount'] = $config['zb_shipping_amount'] * 100;
             $config['zb_shipping_percentage'] = $config['zb_shipping_percentage'] / 100;
         }
+        $config['zb_shipping_product_variations'] = $current_config['zb_shipping_product_variations'];
         return $config;
     }
 }
